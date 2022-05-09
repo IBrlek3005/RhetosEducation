@@ -1,0 +1,195 @@
+﻿Module Bookstore
+{
+    Entity Book
+    {
+        ShortString Code { AutoCode; }
+        ShortString Title { Required; }
+        Reference Author Bookstore.Person;
+        Integer NumberOfPages;
+        ItemFilter CommonMisspelling 'book => book.Title.Contains("curiousity")';
+        InvalidData CommonMisspelling 'It is not allowed to enter misspelled word "curiousity".';
+
+        Logging;
+    }
+    // WishList contains books that are not yet entered in the entity Book.
+    Entity WishList
+    {
+        ShortString BookTitle;
+        Bool HighPriority;
+    }
+
+   // Browse BookGrid Bookstore.Book
+    //{
+     //   Take Code;
+    //    Take Title;
+    //    Take 'Author.Name';
+    //    Take TranslatorName 'Extension_ForeignBook.Translator.Name';
+    //    Take Description 'Extension_BookDescription.Description';
+    //    Take NumberOfComments 'Extension_BookInfo.NumberOfComments';
+
+        // This query is an alternative data source for BookGrid.
+        // Instead of reading data from the `Bookstore.Book`, it provides the new data from WantedBooks.
+   //     Query 'Bookstore.WantedBooks' 'parameter =>
+    //        {
+     //           var wishList = _domRepository.Bookstore.WishList.Query();
+    //            if (parameter != null && parameter.HighPriorityOnly == true)
+    //                wishList = wishList.Where(item => item.HighPriority == true);
+
+    //            var wantedBooks = wishList.Select(wish => new Common.Queryable.Bookstore_BookGrid
+    //            {
+                    // All properies must be declared here, otherwise EF will throw a NotSupportedException.
+    //                ID = wish.ID,
+    //                Code = null,
+    //                Title = wish.BookTitle,
+    //                AuthorName = "unknown",
+    //                TranslatorName = null,
+    //                Description = null,
+    //                NumberOfComments = null
+    //            });
+    //            return wantedBooks;
+    //        }';
+    //    ItemFilter LongDescription 'item => item.Description.Length >= 100';  
+    //}
+
+    //Parameter WantedBooks
+    //{
+    //    Bool HighPriorityOnly;
+    //}
+
+
+    //Parameter LongBooks3
+    //{
+     //   Integer MinimumPages;
+    //    Bool ForeignBooksOnly;
+    //}
+
+
+    Entity Person
+    {
+        ShortString Name;
+        Logging;
+    }
+
+    Entity Comment{
+        Reference Book { Detail; } // automatski generira neke od entiteta(Required, CascadeDelete i SqlIndex)
+        LongString Text;
+    }
+
+    Entity ChildrensBook{
+        Extends Bookstore.Book;
+
+        Integer AgeFrom;
+        Integer AgeTo;
+        IntegerRange AgeFrom AgeTo; //Provjerava postoje li vrijednosti
+    }
+
+    Entity ForeignBook{
+        Extends Bookstore.Book;
+
+        ShortString OriginalLanguage;
+        Reference Translator Bookstore.Person;
+    }
+    Entity Topic{
+        ShortString Name {Unique; Required;}
+    }
+
+    Entity BookTopic{
+        Reference Book { Detail ;}
+        Reference Topic { Required; }
+   
+        UniqueMultiple 'Book Topic'; 
+    }
+
+    Browse BookGrid Bookstore.Book{
+        Take Code;
+        Take Title;
+        Take 'Author.Name';
+        Take TranslatorName 'Extension_ForeignBook.Translator.Name';
+        Take NumberOfComments 'Extension_BookInfo.NumberOfComments';
+    }
+
+   
+    SqlQueryable BookInfo <SQL\BookInfo.sql>
+    {
+        Extends Bookstore.Book;
+        Integer NumberOfComments;
+
+        AutodetectSqlDependencies;
+    }
+
+    Computed ExpectedBookRating 'repository =>
+        {
+            var books = repository.Bookstore.Book.Query()
+                .Select(b =>
+                    new
+                    {
+                        b.ID,
+                        b.Title,
+                        IsForeign = b.Extension_ForeignBook.ID != null
+                    })
+                .ToList();
+
+            var ratings = new List<ExpectedBookRating>();
+            foreach (var book in books)
+            {
+                decimal rating = 0;
+
+                if (book.Title?.IndexOf("super", StringComparison.InvariantCultureIgnoreCase) >= 0)
+                    rating += 100;
+
+                if (book.Title?.IndexOf("great", StringComparison.InvariantCultureIgnoreCase) >= 0)
+                    rating += 50;
+
+                if (book.IsForeign)
+                    rating *= 1.2m;
+
+                ratings.Add(new ExpectedBookRating { ID = book.ID, Rating = rating });
+            }
+
+            return ratings.ToArray();
+        }'
+    {
+        Extends Bookstore.Book;
+        Decimal Rating;
+    }
+    //Day 2 
+        // Implementacija SQL primjera 
+    SqlQueryable TopicInfo <SQL\TopicInfo.sql>
+    {
+        Extends Bookstore.Book;
+        Integer Numbers;
+
+        AutodetectSqlDependencies;
+    }
+
+
+    Browse BookTopicGrid Bookstore.Book
+    {
+        Take Title;
+        Take 'Author.Name';
+        Take NumberOfTopics 'Extension_TopicInfo.Numbers';
+
+    } 
+
+    Entity WishList{
+        ShortString BookTitle;
+        Bool HighPriority;
+    }
+
+
+    Action InsertMultipleBooks
+    '
+    (parameter, repository, userInfo)=>
+    {
+        for(int i=0; i<parameter.NumberOfBooks;i++)
+        {
+            var newBook= new Bookstore.Book{Code = "B+++", Title = parameter.Title};
+            repository.Bookstore.Book.Insert(newBook);
+        }
+    }
+    '
+    {
+        Integer NumberOfBooks;
+        ShortString Title;
+    }
+}

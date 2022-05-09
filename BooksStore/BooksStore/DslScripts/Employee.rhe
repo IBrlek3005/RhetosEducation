@@ -1,0 +1,44 @@
+﻿Module Employees
+{
+	Entity Employee
+	{
+
+	// ModificationTimeOf=> uzima vrijeme zadnjeg updatea?
+		Integer IdentificationNumber { DenyUserEdit; }
+		ShortString LastName { Required; }
+		ShortString FirstName { Required; }
+		ShortString Code { RegExMatch "\d{7,10}" "Code must have 7 to 10 digits."; }
+		DateTime WorkStarted { Required; CreationTime; }
+		DateTime WorkFinished ;
+		Integer TestPeriod { MinValue 1; MaxValue 12; }
+		ShortString Iban { Required; Unique; MinLength 21; MaxLength 21; }
+
+		UniqueMultiple 'LastName FirstName';
+
+
+		ItemFilter FinishBeforeStart 'employee => employee.WorkFinished != null
+			&& employee.WorkFinished.Value < employee.WorkStarted.Value';
+
+		Lock FinishBeforeStart 'It is not allowed to enter a WorkFinished time before the WorkStarted time.';
+	}
+	Entity Manager{
+		Extends Employees.Employee;
+		LongString Bonuses;
+
+		ItemFilter ManagerStartI 'manager=> manager.Base.FirstName.StartsWith("I")';
+	}
+
+	Entity Education {
+		Deactivatable;
+		Reference Employee { Detail; }
+		Date EducationDate;
+		LongString Description;
+	}
+
+	Entity Departments{
+		Reference Employee;
+		Integer DepartmentID { Unique; }
+
+		Logging { AllProperties; }
+	}
+}
