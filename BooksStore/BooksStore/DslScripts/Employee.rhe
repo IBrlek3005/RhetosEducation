@@ -37,8 +37,15 @@
 
 	Entity Departments{
 		Reference Employee;
+		Integer NumberofEmployees;
 		Integer DepartmentID { Unique; }
 
 		Logging { AllProperties; }
 	}
+
+	SqlView NewView <SQL\View.sql>{
+		SqlDependsOn Employees.Employee;
+
+	}
+
 }
