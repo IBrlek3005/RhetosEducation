@@ -30,10 +30,10 @@
 
         Is Bookstore.SalesItem
         {
-            Implements Bookstore.SalesItem.Description "Title + ' ' + Author.ID";
+            Implements Bookstore.SalesItem.Description "(Select a.Name from Bookstore.Person a where a.ID= AuthorID) + ' ' + Title";
             where "Code IS NOT NULL";
         
-        // SqlImplementation "(SELECT b.ID, Description= b.Title + a.Name FROM Bookstore.Book b JOIN Bookstore.Person a ON b.AuthorID = a.ID)";        //???????????????????????????
+       //  SqlImplementation "(SELECT b.ID, Description= b.Title + a.Name FROM Bookstore.Book b JOIN Bookstore.Person a ON b.AuthorID = a.ID)";        //???????????????????????????
             
         }
 
@@ -167,9 +167,9 @@
         Reference Translator Bookstore.Person;
     }
     Entity Topic{
-        ShortString Name {Unique; Required;}
+      //  ShortString Name {Unique; Required;}
+        Sifarnik;
     }
-
     Entity BookTopic{
         Reference Book { Detail ;}
         Reference Topic { Required; }
