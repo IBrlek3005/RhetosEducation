@@ -1,0 +1,28 @@
+﻿Module Bookstore
+{
+	Entity Reading
+	{
+		ShortString NameOfPerson;
+		DateTime FinishDate;
+		DateTime StartDateReading;
+
+		Is Bookstore.ReadingEvent 'Creating'
+		{
+			Implements Bookstore.ReadingEvent.ExecuteDate "StartDateReading";
+			Implements Bookstore.ReadingEvent.Reading "ID";
+			Implements Bookstore.ReadingEvent.NewStatus Bookstore.ReadingStatus.Preparing;
+		}
+	}
+
+	Entity ReadingBook{
+		Reference Reading;
+		Reference Book;
+	}
+
+	Browse ReadingGrid Bookstore.Reading
+    {
+        Take NameOfPerson;
+        Take StartDateReading;
+        Take Trenutno 'Extension_CurrentState.Status.Name';
+    }
+}

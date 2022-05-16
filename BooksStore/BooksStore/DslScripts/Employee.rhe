@@ -43,9 +43,19 @@
 		Logging { AllProperties; }
 	}
 
-	SqlView NewView <SQL\View.sql>{
+	SqlView NewView <SQL\View.sql>
+	{
 		SqlDependsOn Employees.Employee;
-
+	}
+	SqlQueryable NewQueryable 
+		'
+			Select e.ID, nv.LastName,NumbersOfCertificate = COUNT(nv.Description)
+			FROM Employees.Employee e JOIN Employees.NewView nv On nv.ID= e.ID
+			GROUP BY e.ID, nv.LastName;
+		'
+	{
+		Integer NumberOfCertification;
+		SqlDependsOnView Employees.NewView;
 	}
 
 }

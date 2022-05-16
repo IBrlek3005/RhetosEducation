@@ -67,6 +67,8 @@
     <Content Include="Web.config" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DslScripts\CodeTableInfo.cs" />
+    <Compile Include="DslScripts\MoniteredRecordMacro.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
@@ -88,6 +90,13 @@
     <Content Include="rhetos-app.settings.json" />
     <Content Include="rhetos-build.settings.json" />
     <Content Include="DslScripts\Employee.rhe" />
+    <Content Include="DslScripts\Demo.rhe" />
+    <Content Include="DslScripts\Shipment.rhe" />
+    <Content Include="DslScripts\ShipmentState.rhe" />
+    <Content Include="DslScripts\SipmentEvent.rhe" />
+    <Content Include="DslScripts\Reading.rhe" />
+    <Content Include="DslScripts\ReadingState.rhe" />
+    <Content Include="DslScripts\ReadingEvent.rhe" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>

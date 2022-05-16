@@ -1,0 +1,36 @@
+﻿Module Bookstore
+{
+	Polymorphic ReadingEvent
+	{
+		DateTime ExecuteDate;
+		Reference Reading;
+		Reference NewStatus Bookstore.ReadingStatus;
+	}
+	Entity BorrowedBook{
+
+		DateTime ExecuteDate{ CreationTime; }
+		Reference Reading;
+
+		Is Bookstore.ReadingEvent{
+			Implements Bookstore.ReadingEvent.NewStatus Bookstore.ReadingStatus.Borrowed;
+		}
+	}
+	Entity BookRead{
+		DateTime ExecuteDate{ CreationTime; }
+		Reference Reading;
+
+
+		Is Bookstore.ReadingEvent
+		{
+			Implements Bookstore.ReadingEvent.NewStatus Bookstore.ReadingStatus.Read;
+		}
+	}
+	Entity BookReturned{
+		DateTime ExecuteDate { CreationTime; }
+		Reference Reading;
+		Is Bookstore.ReadingEvent
+		{
+			Implements Bookstore.ReadingEvent.NewStatus Bookstore.ReadingStatus.Returned;
+		}
+	}
+}

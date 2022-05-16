@@ -1,0 +1,26 @@
+﻿Module Bookstore{
+	Hardcoded ReadingStatus
+	{
+		Entry Preparing;
+		Entry Borrowed;
+		Entry Read;
+		Entry Returned;
+	}
+		SqlQueryable ExecuteCurrentState <SQL/Reading.sql>
+	{
+		Extends Bookstore.Reading;
+		Reference Status Bookstore.ReadingStatus;
+	
+		ChangesOnLinkedItems Bookstore.BorrowedBook.Reading;
+		ChangesOnLinkedItems Bookstore.BookRead.Reading;
+		ChangesOnLinkedItems Bookstore.BookReturned.Reading;
+		AutodetectSqlDependencies;
+	}
+	Entity CurrentState{
+		ComputedFrom Bookstore.ExecuteCurrentState
+		{
+			KeepSynchronized;
+			AllProperties;
+		}
+	}
+}

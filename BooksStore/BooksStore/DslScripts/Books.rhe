@@ -1,14 +1,46 @@
 ﻿Module Bookstore
 {
+    // Table per Concrete Class 
+    Polymorphic SalesItem
+    {
+        ShortString Code;
+        Money Price;
+        ShortString Description;
+    }
+
+
+    Entity Food{
+        ShortString Code;
+        Money Price { Required; }
+        ShortString Description;
+        Integer Calories;
+
+        Is Bookstore.SalesItem;
+    }
+
     Entity Book
     {
-        ShortString Code { AutoCode; }
+        ShortString Code { AutoCode; DefaultValue 'item => "B+++"';} // polymorphic
         ShortString Title { Required; }
         Reference Author Bookstore.Person;
         Integer NumberOfPages;
         ItemFilter CommonMisspelling 'book => book.Title.Contains("curiousity")';
         InvalidData CommonMisspelling 'It is not allowed to enter misspelled word "curiousity".';
+        Money Price; // polymorphic
 
+        Is Bookstore.SalesItem
+        {
+            Implements Bookstore.SalesItem.Description "Title + ' ' + Author.ID";
+            where "Code IS NOT NULL";
+        
+        // SqlImplementation "(SELECT b.ID, Description= b.Title + a.Name FROM Bookstore.Book b JOIN Bookstore.Person a ON b.AuthorID = a.ID)";        //???????????????????????????
+            
+        }
+
+
+
+
+     //   Deactivatable { DeactivateOnDelete };
         Logging;
 
         ItemFilter LongBooks 'item => item.NumberOfPages >= 500';
@@ -220,6 +252,7 @@
         ShortString BookTitle;
         Bool HighPriority;
     }
+
     Action InsertMultipleBooks
     '(parameter, repository, userInfo)=>
     {
@@ -233,5 +266,37 @@
         Integer NumberOfBooks;
         ShortString Title;
     }
+
+     SqlQueryable ComputeBookInfo
+        "
+            SELECT
+                b.ID,
+                NumberOfComments = COUNT(bc.ID)
+            FROM
+                Bookstore.Book b
+                LEFT JOIN Bookstore.Comment bc ON bc.BookID = b.ID
+            GROUP BY
+                b.ID
+        "
+    {
+        Extends Bookstore.Book;
+        Integer NumberOfComments;
+
+        ChangesOnLinkedItems Bookstore.Comment.Book;
+    }
+    
+
+
+   // Entity BookInfo
+   // {
+   //     ComputedFrom Bookstore.ComputeBookInfo
+   //     {
+   //         AllProperties;
+   //         KeepSynchronized;
+   //     }
+   // }
+
+
+
 
 }
